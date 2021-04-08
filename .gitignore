@@ -1,0 +1,4 @@
+# ignores following folders
+x64/
+a_pingPong/x64
+.vs/
