@@ -28,7 +28,7 @@ const glm::vec2 PLAYER_SIZE(105.0f, 25.0f);
 // Initial velocity of the player paddle
 const float PLAYER_VELOCITY(500.0f);
 // Initial velocity of the Ball
-const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
+const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -100.0f);
 // Radius of the ball object
 const float BALL_RADIUS = 13.0f;
 

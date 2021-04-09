@@ -70,7 +70,7 @@ void Game::Init()
 
 void Game::Update(float dt)
 {
-	Ball->Move(dt, this->Height);
+	Ball->Move(dt, this->Height, this->isPlayer1);
 }
 
 void Game::ProcessInput(float dt)
@@ -119,7 +119,7 @@ void Game::ProcessInput(float dt)
 
 		if (this->Keys[GLFW_KEY_SPACE] && !this->KeysProcessed[GLFW_KEY_SPACE])
 		{
-			Ball->Stuck = !Ball->Stuck;
+			Ball->Stuck = false;
 			this->KeysProcessed[GLFW_KEY_SPACE] = true;
 		}
 
