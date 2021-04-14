@@ -10,8 +10,6 @@
 SpriteRenderer     *Renderer;
 GameObject         *Player1;
 GameObject         *Player2;
-BallObject         *Ball1;
-BallObject         *Ball2;
 BallObject         *Ball;
 
 Game::Game(unsigned int width, unsigned int height)
@@ -56,16 +54,22 @@ void Game::Init()
 	);
 	Player2 = new GameObject(player2Pos, PLAYER_SIZE, ResourceManager::GetTexture("paddle2"));
 
-	glm::vec2 ballPos = player1Pos + glm::vec2(-BALL_RADIUS * 2.0f, PLAYER_SIZE.y / 2.0f - BALL_RADIUS);
-	Ball1 = new BallObject(ballPos, BALL_RADIUS, INITIAL_BALL_VELOCITY,
-		ResourceManager::GetTexture("ball"));
+	glm::vec2 ball1Pos = player1Pos + glm::vec2(-BALL_RADIUS * 2.0f, PLAYER_SIZE.y / 2.0f - BALL_RADIUS);
+	glm::vec2 ball2Pos = player2Pos + glm::vec2(BALL_RADIUS * 2.0f, PLAYER_SIZE.y / 2.0f - BALL_RADIUS);
+	// load levels
+	GameLevel one; one.Load(ball1Pos, ball2Pos, BALL_RADIUS, 4.0f * INITIAL_BALL_VELOCITY);
+	GameLevel two; two.Load(ball1Pos, ball2Pos, BALL_RADIUS, 6.5f * INITIAL_BALL_VELOCITY);
+	GameLevel three; three.Load(ball1Pos, ball2Pos, BALL_RADIUS, 9.0f * INITIAL_BALL_VELOCITY);
+	GameLevel four; four.Load(ball1Pos, ball2Pos, BALL_RADIUS, 12.0f * INITIAL_BALL_VELOCITY);
 
-	ballPos = player2Pos + glm::vec2(BALL_RADIUS * 2.0f, PLAYER_SIZE.y / 2.0f - BALL_RADIUS);
-	Ball2 = new BallObject(ballPos, BALL_RADIUS, INITIAL_BALL_VELOCITY,
-		ResourceManager::GetTexture("ball"));
+	this->Levels.push_back(one);
+	this->Levels.push_back(two);
+	this->Levels.push_back(three);
+	this->Levels.push_back(four);
+	this->Level = 0;
 
 	// set default selected player as player 1
-	Ball = Ball1;
+	Ball = this->Levels[this->Level].getBall1();
 
 }
 
@@ -120,22 +124,42 @@ void Game::ProcessInput(float dt)
 					Ball->Position.y += velocity;
 			}
 		}
-
+		// serve
 		if (this->Keys[GLFW_KEY_SPACE] && !this->KeysProcessed[GLFW_KEY_SPACE])
 		{
 			Ball->Stuck = false;
 			this->KeysProcessed[GLFW_KEY_SPACE] = true;
 		}
-
+		// select player to serve
 		if (this->Keys[GLFW_KEY_RIGHT] && !this->KeysProcessed[GLFW_KEY_RIGHT]) 
 		{ 
-			Ball = Ball1; 
+			Ball = this->Levels[this->Level].getBall1();;
 			this->isPlayer1 = true;
 		}
 		if (this->Keys[GLFW_KEY_LEFT] && !this->KeysProcessed[GLFW_KEY_LEFT])
 		{
-			Ball = Ball2;
+			Ball = this->Levels[this->Level].getBall2();;
 			this->isPlayer1 = false;
+		}
+		// select level difficulty
+		if (this->Keys[GLFW_KEY_D] && !this->KeysProcessed[GLFW_KEY_D])
+		{
+			this->Level = (this->Level + 1) % 4;
+			this->KeysProcessed[GLFW_KEY_D] = true;
+
+			// set default selected player as player 1
+			Ball = this->Levels[this->Level].getBall1();
+		}
+		if (this->Keys[GLFW_KEY_A] && !this->KeysProcessed[GLFW_KEY_A])
+		{
+			if (this->Level > 0)
+				--this->Level;
+			else
+				this->Level = 3;
+			this->KeysProcessed[GLFW_KEY_A] = true;
+
+			// set default selected player as player 1
+			Ball = this->Levels[this->Level].getBall1();
 		}
 	}
 }
@@ -177,7 +201,7 @@ void Game::DoCollisions()
 		float distance = (Ball->Position.y + Ball->Radius) - centerBoard;
 		float percentage = distance / (Player1->Size.y / 2.0f);
 		// then move accordingly
-		float strength = 1.0f;
+		float strength = 2.0f;
 		glm::vec2 oldVelocity = Ball->Velocity;
 		Ball->Velocity.y = INITIAL_BALL_VELOCITY.y * percentage * strength;
 		
@@ -194,7 +218,7 @@ void Game::DoCollisions()
 		float distance = (Ball->Position.y + Ball->Radius) - centerBoard;
 		float percentage = distance / (Player2->Size.y / 2.0f);
 		// then move accordingly
-		float strength = 1.0f;
+		float strength = 2.0f;
 		glm::vec2 oldVelocity = Ball->Velocity;
 		Ball->Velocity.y = INITIAL_BALL_VELOCITY.y * percentage * strength;
 

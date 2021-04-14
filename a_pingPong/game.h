@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "game_level.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -32,7 +34,7 @@ const glm::vec2 PLAYER_SIZE(25.0f, 105.0f);
 // Initial velocity of the player paddle
 const float PLAYER_VELOCITY(500.0f);
 // Initial velocity of the Ball
-const glm::vec2 INITIAL_BALL_VELOCITY(100.0f*5.0f, -100.0f*5.0f);
+const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -100.0f);
 // Radius of the ball object
 const float BALL_RADIUS = 13.0f;
 
@@ -47,6 +49,8 @@ public:
 	bool					isPlayer1;
 	bool                    KeysProcessed[1024];
 	bool                    Keys[1024];
+	std::vector<GameLevel>  Levels;
+	unsigned int            Level;
 	unsigned int            Width, Height;
 	// constructor/destructor
 	Game(unsigned int width, unsigned int height);
