@@ -23,12 +23,16 @@ enum Direction {
 	LEFT
 };
 
+// Defines a Collision typedef that represents collision data
+typedef std::tuple<bool, Direction, glm::vec2> Collision; // <collision?, what direction?, difference vector center - closest point>
+
 // Initial size of the player paddle
-const glm::vec2 PLAYER_SIZE(105.0f, 25.0f);
+//const glm::vec2 PLAYER_SIZE(105.0f, 25.0f);
+const glm::vec2 PLAYER_SIZE(25.0f, 105.0f);
 // Initial velocity of the player paddle
 const float PLAYER_VELOCITY(500.0f);
 // Initial velocity of the Ball
-const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -100.0f);
+const glm::vec2 INITIAL_BALL_VELOCITY(100.0f*5.0f, -100.0f*5.0f);
 // Radius of the ball object
 const float BALL_RADIUS = 13.0f;
 
@@ -53,7 +57,7 @@ public:
 	void ProcessInput(float dt);
 	void Update(float dt);
 	void Render();
-	
+	void DoCollisions();
 	// reset
 	void ResetPlayer();
 };
