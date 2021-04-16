@@ -25,6 +25,14 @@ enum Direction {
 	LEFT
 };
 
+// Represents the four levels of difficulty
+const std::vector<std::string>  LEVEL_DIFFICULTY {
+	"Amateur",
+	"Pro",
+	"Expert",
+	"World Class"
+};
+
 // Defines a Collision typedef that represents collision data
 typedef std::tuple<bool, Direction, glm::vec2> Collision; // <collision?, what direction?, difference vector center - closest point>
 
@@ -63,7 +71,10 @@ public:
 	void Render();
 	void DoCollisions();
 	// reset
-	void ResetPlayer();
+	void ResetPlayer1Game();
+	void ResetPlayer2Game();
+	void ResetPlayer1();
+	void ResetPlayer2();
 };
 
 #endif

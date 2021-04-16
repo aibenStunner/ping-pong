@@ -15,9 +15,10 @@ class GameObject
 {
 public:
 	// object state
-	glm::vec2   Position, Size, Velocity;
-	glm::vec3   Color;
-	float       Rotation;
+	glm::vec2      Position, Size, Velocity;
+	glm::vec3      Color;
+	float          Rotation;
+	unsigned int   Score = 0;
 	// render state
 	Texture2D   Sprite;
 	// constructor(s)

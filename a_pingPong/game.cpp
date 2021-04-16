@@ -93,6 +93,22 @@ void Game::Update(float dt)
 	this->DoCollisions();
 	// update particles
 	Particles->Update(dt, *Ball, 2, glm::vec2(Ball->Radius / 2.0f));
+	// check loss condition - player1
+	if (Ball->Position.x >= this->Width) // did ball reach right edge?
+	{
+		Player2->Score++;
+		std::cout << "Player1 " << Player1->Score << "  :  " << "Player2 " << Player2->Score << std::endl;
+		this->ResetPlayer1Game();
+		this->ResetPlayer2();
+	}
+	// check loss condition - player2
+	if (Ball->Position.x <= 0.0f) // did ball reach right edge?
+	{
+		Player1->Score++;
+		std::cout << "Player1 " << Player1->Score << "  :  " << "Player2 " << Player2->Score << std::endl;
+		this->ResetPlayer2Game();
+		this->ResetPlayer1();
+	}
 }
 
 void Game::ProcessInput(float dt)
@@ -147,12 +163,12 @@ void Game::ProcessInput(float dt)
 		// select player to serve
 		if (this->Keys[GLFW_KEY_RIGHT] && !this->KeysProcessed[GLFW_KEY_RIGHT]) 
 		{ 
-			Ball = this->Levels[this->Level].getBall1();;
+			Ball = this->Levels[this->Level].getBall1();
 			this->isPlayer1 = true;
 		}
 		if (this->Keys[GLFW_KEY_LEFT] && !this->KeysProcessed[GLFW_KEY_LEFT])
 		{
-			Ball = this->Levels[this->Level].getBall2();;
+			Ball = this->Levels[this->Level].getBall2();
 			this->isPlayer1 = false;
 		}
 		// select level difficulty
@@ -163,6 +179,8 @@ void Game::ProcessInput(float dt)
 
 			// set default selected player as player 1
 			Ball = this->Levels[this->Level].getBall1();
+			
+			std::cout << LEVEL_DIFFICULTY[Level] << std::endl;
 		}
 		if (this->Keys[GLFW_KEY_A] && !this->KeysProcessed[GLFW_KEY_A])
 		{
@@ -174,6 +192,8 @@ void Game::ProcessInput(float dt)
 
 			// set default selected player as player 1
 			Ball = this->Levels[this->Level].getBall1();
+
+			std::cout << LEVEL_DIFFICULTY[Level] << std::endl;
 		}
 	}
 }
@@ -198,11 +218,42 @@ void Game::Render()
 	Player2->Draw(*Renderer);
 }
 
-void Game::ResetPlayer()
+void Game::ResetPlayer1Game()
 {
-
+	Player1->Position = glm::vec2(
+		this->Width - PLAYER_SIZE.x - 5.0f,
+		this->Height / 2.0f - PLAYER_SIZE.y / 2.0f
+	);
+	Ball->Reset(Player1->Position + glm::vec2(-BALL_RADIUS * 2.0f, PLAYER_SIZE.y / 2.0f - BALL_RADIUS), this->Levels[this->Level].getBall1()->Velocity);
+	this->isPlayer1 = true;
 }
 
+void Game::ResetPlayer2Game()
+{
+	Player2->Position = glm::vec2(
+		0.0f + 5.0f,
+		this->Height / 2.0f - PLAYER_SIZE.y / 2.0f
+	);
+	Ball->Reset(Player2->Position + glm::vec2(BALL_RADIUS * 2.0f, PLAYER_SIZE.y / 2.0f - BALL_RADIUS), this->Levels[this->Level].getBall2()->Velocity);
+	this->isPlayer1 = false;
+}
+
+void Game::ResetPlayer1()
+{
+	Player1->Position = glm::vec2(
+		this->Width - PLAYER_SIZE.x - 5.0f,
+		this->Height / 2.0f - PLAYER_SIZE.y / 2.0f
+	);
+}
+
+void Game::ResetPlayer2()
+{
+	Player2->Position = glm::vec2(
+		0.0f + 5.0f,
+		this->Height / 2.0f - PLAYER_SIZE.y / 2.0f
+	);
+
+}
 // collision detection
 Collision CheckCollision(BallObject &one, GameObject &two);
 Direction VectorDirection(glm::vec2 closest);
