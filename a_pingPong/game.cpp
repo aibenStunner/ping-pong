@@ -5,12 +5,14 @@
 #include "sprite_renderer.h"
 #include "resource_manager.h"
 #include "ball_object.h"
+#include "particle_generator.h"
 
 // Game-related State data
 SpriteRenderer     *Renderer;
 GameObject         *Player1;
 GameObject         *Player2;
 BallObject         *Ball;
+ParticleGenerator  *Particles;
 
 Game::Game(unsigned int width, unsigned int height)
 	: State(GAME_ACTIVE), Keys(), Width(width), Height(height), isPlayer1(true)
@@ -24,24 +26,34 @@ Game::~Game()
 	delete Player1;
 	delete Player2;
 	delete Ball;
+	delete Particles;
 }
 
 void Game::Init()
 {
 	// load shaders
 	ResourceManager::LoadShader("shaders/sprite/sprite.vs", "shaders/sprite/sprite.fs", nullptr, "sprite");
+	ResourceManager::LoadShader("shaders/particle/particle.vs", "shaders/particle/particle.fs", nullptr, "particle");
 	// configure shaders
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width),
 		static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
 	ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
 	ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-	// set render-specific controls
-	Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+	ResourceManager::GetShader("particle").Use().SetInteger("sprite", 0);
+	ResourceManager::GetShader("particle").SetMatrix4("projection", projection);
 	// load textures
 	ResourceManager::LoadTexture("textures/background.jpg", false, "background");
 	ResourceManager::LoadTexture("textures/ball.png", true, "ball");
 	ResourceManager::LoadTexture("textures/paddle1.png", true, "paddle1");
 	ResourceManager::LoadTexture("textures/paddle2.png", true, "paddle2");
+	ResourceManager::LoadTexture("textures/particle.png", true, "particle");
+	// set render-specific controls
+	Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+	Particles = new ParticleGenerator(
+		ResourceManager::GetShader("particle"),
+		ResourceManager::GetTexture("particle"),
+		500
+	);
 	// configure game objects
 	glm::vec2 player1Pos = glm::vec2(
 		this->Width - PLAYER_SIZE.x - 5.0f,
@@ -79,6 +91,8 @@ void Game::Update(float dt)
 	Ball->Move(dt, this->Height, this->isPlayer1);
 	// check for collisions
 	this->DoCollisions();
+	// update particles
+	Particles->Update(dt, *Ball, 2, glm::vec2(Ball->Radius / 2.0f));
 }
 
 void Game::ProcessInput(float dt)
@@ -170,6 +184,9 @@ void Game::Render()
 	Renderer->DrawSprite(ResourceManager::GetTexture("background"),
 		glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f
 	);
+
+	// draw particles	
+	Particles->Draw();
 
 	// draw ball
 	Ball->Draw(*Renderer);
