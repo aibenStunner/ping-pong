@@ -1,11 +1,14 @@
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <sstream>
+
 
 #include "game.h"
 #include "sprite_renderer.h"
 #include "resource_manager.h"
 #include "ball_object.h"
 #include "particle_generator.h"
+#include "text_renderer.h"
 
 // Game-related State data
 SpriteRenderer     *Renderer;
@@ -13,9 +16,11 @@ GameObject         *Player1;
 GameObject         *Player2;
 BallObject         *Ball;
 ParticleGenerator  *Particles;
+TextRenderer       *Text;
+TextRenderer       *Text_;
 
 Game::Game(unsigned int width, unsigned int height)
-	: State(GAME_ACTIVE), Keys(), Width(width), Height(height), isPlayer1(true)
+	: State(GAME_MENU), Keys(), Width(width), Height(height), isPlayer1(true)
 {
 
 }
@@ -27,6 +32,8 @@ Game::~Game()
 	delete Player2;
 	delete Ball;
 	delete Particles;
+	delete Text;
+	delete Text_;
 }
 
 void Game::Init()
@@ -54,6 +61,10 @@ void Game::Init()
 		ResourceManager::GetTexture("particle"),
 		500
 	);
+	Text = new TextRenderer(this->Width, this->Height);
+	Text_ = new TextRenderer(this->Width, this->Height);
+	Text->Load("fonts/OCRAEXT.TTF", 20);
+	Text_->Load("fonts/ALLSTAR.TTF", 85);
 	// configure game objects
 	glm::vec2 player1Pos = glm::vec2(
 		this->Width - PLAYER_SIZE.x - 5.0f,
@@ -97,7 +108,6 @@ void Game::Update(float dt)
 	if (Ball->Position.x >= this->Width) // did ball reach right edge?
 	{
 		Player2->Score++;
-		std::cout << "Player1 " << Player1->Score << "  :  " << "Player2 " << Player2->Score << std::endl;
 		this->ResetPlayer1Game();
 		this->ResetPlayer2();
 	}
@@ -105,9 +115,24 @@ void Game::Update(float dt)
 	if (Ball->Position.x <= 0.0f) // did ball reach right edge?
 	{
 		Player1->Score++;
-		std::cout << "Player1 " << Player1->Score << "  :  " << "Player2 " << Player2->Score << std::endl;
 		this->ResetPlayer2Game();
 		this->ResetPlayer1();
+	}
+
+	// check win condition
+	if (this->State == GAME_ACTIVE)
+	{
+		if (Player1->Score == 11)
+		{
+			Player1Win = true;
+			this->State = GAME_WIN;
+		}
+			
+		if (Player2->Score == 11)
+		{
+			Player1Win = false;
+			this->State = GAME_WIN;
+		}
 	}
 }
 
@@ -160,9 +185,19 @@ void Game::ProcessInput(float dt)
 			Ball->Stuck = false;
 			this->KeysProcessed[GLFW_KEY_SPACE] = true;
 		}
+	}
+
+	if (this->State == GAME_MENU)
+	{
+		// start game
+		if (this->Keys[GLFW_KEY_ENTER] && !this->KeysProcessed[GLFW_KEY_ENTER])
+		{
+			this->State = GAME_ACTIVE;
+			this->KeysProcessed[GLFW_KEY_ENTER] = true;
+		}
 		// select player to serve
-		if (this->Keys[GLFW_KEY_RIGHT] && !this->KeysProcessed[GLFW_KEY_RIGHT]) 
-		{ 
+		if (this->Keys[GLFW_KEY_RIGHT] && !this->KeysProcessed[GLFW_KEY_RIGHT])
+		{
 			Ball = this->Levels[this->Level].getBall1();
 			this->isPlayer1 = true;
 		}
@@ -179,8 +214,7 @@ void Game::ProcessInput(float dt)
 
 			// set default selected player as player 1
 			Ball = this->Levels[this->Level].getBall1();
-			
-			std::cout << LEVEL_DIFFICULTY[Level] << std::endl;
+			this->isPlayer1 = true;
 		}
 		if (this->Keys[GLFW_KEY_A] && !this->KeysProcessed[GLFW_KEY_A])
 		{
@@ -192,30 +226,80 @@ void Game::ProcessInput(float dt)
 
 			// set default selected player as player 1
 			Ball = this->Levels[this->Level].getBall1();
-
-			std::cout << LEVEL_DIFFICULTY[Level] << std::endl;
+		}
+	}
+	
+	if (this->State == GAME_WIN)
+	{
+		if (this->Keys[GLFW_KEY_ENTER])
+		{
+			this->KeysProcessed[GLFW_KEY_ENTER] = true;
+			this->State = GAME_MENU;
+			this->ResetGame();
 		}
 	}
 }
 
 void Game::Render()
 {
-	// draw background
-	Renderer->DrawSprite(ResourceManager::GetTexture("background"),
-		glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f
-	);
+	if (this->State == GAME_ACTIVE || this->State == GAME_MENU)
+	{
+		// draw background
+		Renderer->DrawSprite(ResourceManager::GetTexture("background"),
+			glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f
+		);
 
-	// draw particles	
-	Particles->Draw();
+		// draw particles	
+		Particles->Draw();
 
-	// draw ball
-	Ball->Draw(*Renderer);
+		// draw ball
+		Ball->Draw(*Renderer);
 
-	// draw player one
-	Player1->Draw(*Renderer);
-	
-	// draw player two
-	Player2->Draw(*Renderer);
+		// draw player one
+		Player1->Draw(*Renderer);
+
+		// draw player two
+		Player2->Draw(*Renderer);
+
+		// render text
+		std::stringstream ss; ss << LEVEL_DIFFICULTY[Level];
+		Text->RenderText("Difficulty: " + ss.str(), 45.0f, 20.0f, 0.93f);
+	}
+
+	if (this->State == GAME_ACTIVE || this->State == GAME_MENU || this->State == GAME_WIN)
+	{
+		std::stringstream ss2; ss2 << Player2->Score;
+		(Player2->Score > 9) ? Text_->RenderText(ss2.str(), 345.0f, 30.0f, 0.85) : Text_->RenderText(ss2.str(), 380.0f, 30.0f, 0.85);
+
+		std::stringstream ss1; ss1 << Player1->Score;
+		Text_->RenderText(ss1.str(), 480.0f, 30.0f, 0.85);
+	}
+
+	if (this->State == GAME_MENU)
+	{
+		Text_->RenderText("PING PONG", 250.0f, Height / 2 - 20.0f, 1.0f);
+
+		Text->RenderText("Press ENTER to start or ESC to quit", 467.0f, Height / 2 + 80.0f, 0.80f);
+		Text->RenderText("Press A or D to select Difficulty", 120.0f, Height / 2 + 80.0f, 0.80f);
+
+		Text->RenderText("Press LEFT ARROW to make Player 2 serve", 50.0f, 500.0f, 0.80f);
+		Text->RenderText("Use W or S to move", 50.0f, 520.0f, 0.80f);
+
+		Text->RenderText("Press RIGHT ARROW to make Player 1 serve", 467.0f, 500.0f, 0.80f);
+		Text->RenderText("Use UP ARROW or DOWN ARROW to move", 467.0f, 520.0f, 0.80f);
+	}
+
+	if (this->State == GAME_WIN)
+	{
+		(Player1Win) ? Text->RenderText(
+			"Player 1 WON!!!", 280.0, Height / 2 - 50.0f, 2.0f, glm::vec3(0.0, 1.0, 0.0)
+		) : Text->RenderText(
+			"Player 2 WON!!!", 280.0, Height / 2 - 50.0f, 2.0f, glm::vec3(0.0, 1.0, 0.0)
+		);
+		Text->RenderText(
+			"Press ENTER to replay or ESC to quit", 245.0, Height / 2 + 20, 1.0f, glm::vec3(1.0, 1.0, 0.0)
+		);
+	}
 }
 
 void Game::ResetPlayer1Game()
@@ -254,6 +338,15 @@ void Game::ResetPlayer2()
 	);
 
 }
+
+void Game::ResetGame()
+{
+	this->ResetPlayer1Game();
+	this->ResetPlayer2();
+	Player1->Score = 0;
+	Player2->Score = 0;
+}
+
 // collision detection
 Collision CheckCollision(BallObject &one, GameObject &two);
 Direction VectorDirection(glm::vec2 closest);

@@ -55,6 +55,7 @@ public:
 	// game state
 	GameState               State;
 	bool					isPlayer1;
+	bool					Player1Win;
 	bool                    KeysProcessed[1024];
 	bool                    Keys[1024];
 	std::vector<GameLevel>  Levels;
@@ -75,6 +76,7 @@ public:
 	void ResetPlayer2Game();
 	void ResetPlayer1();
 	void ResetPlayer2();
+	void ResetGame();
 };
 
 #endif
