@@ -2,6 +2,9 @@
 #include <iostream>
 #include <sstream>
 
+#include <irrKlang/irrKlang.h>
+using namespace irrklang;
+
 
 #include "game.h"
 #include "sprite_renderer.h"
@@ -18,6 +21,7 @@ BallObject         *Ball;
 ParticleGenerator  *Particles;
 TextRenderer       *Text;
 TextRenderer       *Text_;
+ISoundEngine       *SoundEngine = createIrrKlangDevice();
 
 Game::Game(unsigned int width, unsigned int height)
 	: State(GAME_MENU), Keys(), Width(width), Height(height), isPlayer1(true)
@@ -94,6 +98,8 @@ void Game::Init()
 	// set default selected player as player 1
 	Ball = this->Levels[this->Level].getBall1();
 
+	// audio
+	SoundEngine->play2D("audio/soundtrack.mp3", false);
 }
 
 void Game::Update(float dt)
@@ -110,6 +116,7 @@ void Game::Update(float dt)
 		Player2->Score++;
 		this->ResetPlayer1Game();
 		this->ResetPlayer2();
+		SoundEngine->play2D("audio/plog.ogg", false);
 	}
 	// check loss condition - player2
 	if (Ball->Position.x <= 0.0f) // did ball reach right edge?
@@ -117,6 +124,7 @@ void Game::Update(float dt)
 		Player1->Score++;
 		this->ResetPlayer2Game();
 		this->ResetPlayer1();
+		SoundEngine->play2D("audio/plog.ogg", false);
 	}
 
 	// check win condition
@@ -357,6 +365,7 @@ void Game::DoCollisions()
 	Collision result = CheckCollision(*Ball, *Player1);
 	if (!Ball->Stuck && std::get<0>(result))
 	{
+		SoundEngine->play2D("audio/bleep.mp3", false);
 		// check where it hit the board, and change velocity based on where it hit the board
 		float centerBoard = Player1->Position.y + Player1->Size.y / 2.0f;
 		float distance = (Ball->Position.y + Ball->Radius) - centerBoard;
@@ -374,6 +383,7 @@ void Game::DoCollisions()
 	result = CheckCollision(*Ball, *Player2);
 	if (!Ball->Stuck && std::get<0>(result))
 	{
+		SoundEngine->play2D("audio/bleep.mp3", false);
 		// check where it hit the board, and change velocity based on where it hit the board
 		float centerBoard = Player2->Position.y + Player2->Size.y / 2.0f;
 		float distance = (Ball->Position.y + Ball->Radius) - centerBoard;
