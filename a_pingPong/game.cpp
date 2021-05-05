@@ -274,6 +274,12 @@ void Game::Render()
 		Text->RenderText("Difficulty: " + ss.str(), 45.0f, 20.0f, 0.93f);
 	}
 
+	if (this->State == GAME_ACTIVE && Ball->Stuck) {
+		Text->RenderText(
+			"Press SPACE to serve!", 245.0, Height / 2, 1.5f, glm::vec3(1.0, 1.0, 0.0)
+		);
+	}
+
 	if (this->State == GAME_ACTIVE || this->State == GAME_MENU || this->State == GAME_WIN)
 	{
 		std::stringstream ss2; ss2 << Player2->Score;
@@ -287,7 +293,7 @@ void Game::Render()
 	{
 		Text_->RenderText("PING PONG", 250.0f, Height / 2 - 20.0f, 1.0f);
 
-		Text->RenderText("Press ENTER to start or ESC to quit", 467.0f, Height / 2 + 80.0f, 0.80f);
+		Text->RenderText("Press ENTER to start and ESC to quit", 467.0f, Height / 2 + 80.0f, 0.80f);
 		Text->RenderText("Press A or D to select Difficulty", 120.0f, Height / 2 + 80.0f, 0.80f);
 
 		Text->RenderText("Press LEFT ARROW to make Player 2 serve", 50.0f, 500.0f, 0.80f);
@@ -305,7 +311,7 @@ void Game::Render()
 			"Player 2 WON!!!", 280.0, Height / 2 - 50.0f, 2.0f, glm::vec3(0.0, 1.0, 0.0)
 		);
 		Text->RenderText(
-			"Press ENTER to replay or ESC to quit", 245.0, Height / 2 + 20, 1.0f, glm::vec3(1.0, 1.0, 0.0)
+			"Press ENTER to replay and ESC to quit", 245.0, Height / 2 + 20, 1.0f, glm::vec3(1.0, 1.0, 0.0)
 		);
 	}
 }
