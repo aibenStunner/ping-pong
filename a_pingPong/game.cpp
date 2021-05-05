@@ -99,7 +99,7 @@ void Game::Init()
 	Ball = this->Levels[this->Level].getBall1();
 
 	// audio
-	SoundEngine->play2D("audio/soundtrack.mp3", false);
+	SoundEngine->play2D("audio/soundtrack.mp3", true);
 }
 
 void Game::Update(float dt)
@@ -130,13 +130,13 @@ void Game::Update(float dt)
 	// check win condition
 	if (this->State == GAME_ACTIVE)
 	{
-		if (Player1->Score == 11)
+		if (Player1->Score == WIN_SCORE)
 		{
 			Player1Win = true;
 			this->State = GAME_WIN;
 		}
 			
-		if (Player2->Score == 11)
+		if (Player2->Score == WIN_SCORE)
 		{
 			Player1Win = false;
 			this->State = GAME_WIN;

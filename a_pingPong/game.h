@@ -45,6 +45,8 @@ const float PLAYER_VELOCITY(500.0f);
 const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -100.0f);
 // Radius of the ball object
 const float BALL_RADIUS = 13.0f;
+// win score
+const int WIN_SCORE = 11;
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
