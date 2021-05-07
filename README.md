@@ -7,10 +7,10 @@ Course project for Computer Graphics at Kwame Nkrumah University of Science and 
    * Cool soundtrack :smirk:
 
 ## Demo :movie_camera:
-    ![](res/demo1.png)
-    ![](res/demo2.png)
-    ![](res/demo3.png)
-    ![](res/demo4.png)
+  ![](res/demo1.png)
+  ![](res/demo2.png)
+  ![](res/demo3.png)
+  ![](res/demo4.png)
 
 ## Contributing :gift: [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
